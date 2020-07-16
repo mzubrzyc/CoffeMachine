@@ -13,18 +13,6 @@ public class CoffeeType {
         this.price = price;
     }
 
-    public void resourcesCoffeeCups(int numOfCups) {
-        int water = numOfCups * getAmountOfWater();
-        int milk = numOfCups * getAmountOfMilk();
-        int coffee = numOfCups * getAmountOfCoffee();
-
-        System.out.println("Chosen type of coffee is: " + getName());
-        System.out.printf("For %d cups of coffee you will need:%n" +
-                "%d ml of water%n" +
-                "%d ml of milk%n" +
-                "%d g of coffee beans", numOfCups, water, milk, coffee);
-    }
-
     public int getAmountOfWater() {
         return amountOfWater;
     }

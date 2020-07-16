@@ -1,0 +1,6 @@
+public enum ChooseCoffeeType {
+
+    ESPRESSO,
+    
+
+}
