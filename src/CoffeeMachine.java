@@ -24,61 +24,20 @@ public class CoffeeMachine {
 // At the same time, the program should calculate how many ingredients it has left.
 // And also display the number of ingredients before and after purchase.
 
-        String[] coffeeResourcesQueries = new String[]{
-                "\nWrite how many ml of water do you want to add:",
-                "Write how many ml of milk do you want to add:",
-                "Write how many grams of coffee beans do you want to add:",
-                "Write how many disposable cups of coffee do you want to add:"
-        };
 
-        CoffeeMachineDevice coffeeMachine1 = new CoffeeMachineDevice(400, 540, 120, 9, 550);
-
+        // Defining new Coffee Types
         CoffeeType espresso = new CoffeeType("espresso", 250, 0, 16, 4);
         CoffeeType latte = new CoffeeType("latte", 350, 75, 20, 7);
         CoffeeType cappuccino = new CoffeeType("cappuccino", 200, 100, 12, 6);
 
         ArrayList<CoffeeType> availableCoffeeTypes = new ArrayList<>(Arrays.asList(espresso, latte, cappuccino));
 
-        boolean end = false;
+        // Defining a new CoffeeMachine
+        CoffeeMachineDevice coffeeMachine1 = new CoffeeMachineDevice(
+                400, 540, 120, 9, 550, availableCoffeeTypes);
 
-        while (!end) {
+        coffeeMachineInterface(coffeeMachine1);
 
-            System.out.println("\nWrite action (buy, fill, take, remaining, exit): ");
-            String answer = scanner.nextLine();
-
-            switch (answer) {
-                case "buy":
-
-                    System.out.println("\nWhat do you want to buy? 1 - espresso, 2 - latte, 3 - cappuccino, back - to main menu:");
-                    answer = scanner.nextLine();
-                    switch (answer) {
-                        case "1":
-                            coffeeMachineAnswer(coffeeMachine1.coffeeRequest(availableCoffeeTypes.get(0)));
-                            break;
-                        case "2":
-                            coffeeMachineAnswer(coffeeMachine1.coffeeRequest(availableCoffeeTypes.get(1)));
-                            break;
-                        case "3":
-                            coffeeMachineAnswer(coffeeMachine1.coffeeRequest(availableCoffeeTypes.get(2)));
-                            break;
-                        case "back":
-                            break;
-                    }
-                    break;
-                case "fill":
-                    int[] resources = resources(coffeeResourcesQueries);
-                    coffeeMachine1.fillResources(resources);
-                    break;
-                case "take":
-                    System.out.printf("%nI gave you $%d%n", coffeeMachine1.takeMoney());
-                    break;
-                case "remaining":
-                    coffeeMachine1.getResources();
-                    break;
-                case "exit":
-                    end = true;
-            }
-        }
     }
 
     private static int[] resources(String[] questions) {
@@ -97,6 +56,85 @@ public class CoffeeMachine {
             System.out.println("I have enough resources, making you a coffee!");
         } else {
             System.out.println("Sorry, not enough water!");
+        }
+    }
+
+    private static void coffeeMachineInterface(CoffeeMachineDevice coffeeMachine) {
+
+        String[] coffeeResourcesQueries = new String[]{
+                "\nWrite how many ml of water do you want to add:",
+                "Write how many ml of milk do you want to add:",
+                "Write how many grams of coffee beans do you want to add:",
+                "Write how many disposable cups of coffee do you want to add:"
+        };
+
+        ArrayList<CoffeeType> availableCoffeeTypes = coffeeMachine.getCoffeeTypes();
+
+        CoffeeMachineState coffeeMachineState = coffeeMachine.getState();
+
+        switch (coffeeMachineState) {
+            case ACTION:
+                System.out.println("\nWrite action (buy, fill, take, remaining, exit): ");
+                String answer = scanner.nextLine();
+                interfaceAction(coffeeMachine, availableCoffeeTypes, answer, coffeeResourcesQueries);
+                break;
+            case CHOOSING_COFFEE:
+                System.out.println("\nWhat do you want to buy? 1 - espresso, 2 - latte, 3 - cappuccino, back - to main menu:");
+                answer = scanner.nextLine();
+                for (CoffeeTypeAns type : CoffeeTypeAns.values()) {
+                    if (answer.equals(type.getAnswer())) {
+                        int coffeeIndex = Integer.parseInt(answer) - 1;
+                        coffeeMachineAnswer(coffeeMachine.coffeeRequest(availableCoffeeTypes.get(coffeeIndex)));
+                    }
+                }
+                break;
+            case REPLENISHING:
+                int[] resources = resources(coffeeResourcesQueries);
+                coffeeMachine.fillResources(resources);
+                break;
+            case TAKING_MONEY:
+                System.out.printf("%nI gave you $%d%n", coffeeMachine.takeMoney());
+                break;
+            case CHECKING_RESOURCES:
+                coffeeMachine.getResources();
+                break;
+            case EXITING:
+                break;
+        }
+
+        if (!coffeeMachine.getState().equals(CoffeeMachineState.EXITING)) {
+            coffeeMachine.setState(CoffeeMachineState.ACTION);
+            coffeeMachineInterface(coffeeMachine);
+        }
+    }
+
+    private static void interfaceAction(CoffeeMachineDevice coffeeMachine, ArrayList<CoffeeType> availableCoffeeTypes,
+                                        String answer, String[] coffeeResourcesQueries) {
+
+        ActionAns actionAnswer = ActionAns.getAns(answer);
+
+        if (actionAnswer != null) {
+            switch (actionAnswer) {
+                case BUY:
+                    coffeeMachine.setState(CoffeeMachineState.CHOOSING_COFFEE);
+                    coffeeMachineInterface(coffeeMachine);
+                    break;
+                case FILL:
+                    coffeeMachine.setState(CoffeeMachineState.REPLENISHING);
+                    coffeeMachineInterface(coffeeMachine);
+                    break;
+                case TAKE:
+                    coffeeMachine.setState(CoffeeMachineState.TAKING_MONEY);
+                    coffeeMachineInterface(coffeeMachine);
+                    break;
+                case REMAINING:
+                    coffeeMachine.setState(CoffeeMachineState.CHECKING_RESOURCES);
+                    coffeeMachineInterface(coffeeMachine);
+                    break;
+                case EXIT:
+                    coffeeMachine.setState(CoffeeMachineState.EXITING);
+                    coffeeMachineInterface(coffeeMachine);
+            }
         }
     }
 }

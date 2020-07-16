@@ -1,9 +1,13 @@
+import java.util.ArrayList;
+
 public class CoffeeMachineDevice {
     private int water;
     private int milk;
     private int coffee;
     private int cups;
     private int money;
+    private final ArrayList<CoffeeType> coffeeTypes;
+    private CoffeeMachineState state;
 
     public CoffeeMachineDevice() {
         this.water = 0;
@@ -11,14 +15,18 @@ public class CoffeeMachineDevice {
         this.coffee = 0;
         this.cups = 0;
         this.money = 0;
+        this.coffeeTypes = new ArrayList<>();
+        this.state = CoffeeMachineState.ACTION;
     }
 
-    public CoffeeMachineDevice(int water, int milk, int coffee, int cups, int money) {
+    public CoffeeMachineDevice(int water, int milk, int coffee, int cups, int money, ArrayList<CoffeeType> coffeeTypes) {
         this.water = water;
         this.milk = milk;
         this.coffee = coffee;
         this.cups = cups;
         this.money = money;
+        this.coffeeTypes = coffeeTypes;
+        this.state = CoffeeMachineState.ACTION;
     }
 
     public int enoughResources(CoffeeType coffeeType) {
@@ -30,17 +38,6 @@ public class CoffeeMachineDevice {
         return resources;
     }
 
-    public void coffeeCupsRequest(CoffeeType coffeeType, int numCups) {
-        int cupsAvailable = enoughResources(coffeeType);
-        if (cupsAvailable < numCups) {
-            System.out.printf("No, I can make only %d cup(s) of coffee%n", cupsAvailable);
-        } else if (cupsAvailable == numCups) {
-            System.out.printf("Yes, I can make that amount of coffee%n");
-        } else {
-            System.out.printf("Yes, I can make that amount of coffee (and even %d more than that)%n", cupsAvailable - numCups);
-        }
-    }
-
     public void getResources() {
         System.out.println("\nThe coffee machine has:");
         System.out.printf("%d of water%n%d of milk%n%d of coffee beans%n%d of disposable cups%n$%d of money%n",
@@ -48,6 +45,10 @@ public class CoffeeMachineDevice {
     }
 
     public boolean coffeeRequest(CoffeeType coffeeType) {
+        if (!coffeeTypes.contains(coffeeType)) {
+            return false;
+        }
+
         if (enoughResources(coffeeType) > 0) {
             water -= coffeeType.getAmountOfWater();
             milk -= coffeeType.getAmountOfMilk();
@@ -106,5 +107,17 @@ public class CoffeeMachineDevice {
 
     public int getMoney() {
         return money;
+    }
+
+    public ArrayList<CoffeeType> getCoffeeTypes() {
+        return coffeeTypes;
+    }
+
+    public CoffeeMachineState getState() {
+        return state;
+    }
+
+    public void setState(CoffeeMachineState state) {
+        this.state = state;
     }
 }
